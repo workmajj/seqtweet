@@ -11,7 +11,6 @@ def main():
     auth.get_access_token(pin)
     print "Access Key: %s" % (auth.access_token.key)
     print "Access Secret: %s" % (auth.access_token.secret)
-    
 
 if __name__ == '__main__':
     main()
