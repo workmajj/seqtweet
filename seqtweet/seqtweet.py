@@ -75,11 +75,6 @@ def text_to_list(api, msg, max_payload=140):
     l.append(chunk)
     return l
 
-def get_api(c_key, c_secret, a_key, a_secret):
-    auth = tweepy.OAuthHandler(c_key, c_secret)
-    auth.set_access_token(a_key, a_secret)
-    return tweepy.API(auth)
-
 def main():
     from creds import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET
     obj = SeqTweet(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET)
