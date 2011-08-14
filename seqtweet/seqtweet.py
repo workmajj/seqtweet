@@ -68,28 +68,30 @@ def list_to_twitter(api, l, max_size=140):
         tweet_id = tweet.id_str
     return tweet_id
 
-def text_to_list(api, msg, max_payload=140):
+def string_to_list(s, pad_size, max_size=140):
     l = []
     chunk = ''
-    username = api.me().screen_name
-    split_msg = msg.split()
-    for word in split_msg:
-        if 1 + len(username) + 1 + len(word) > max_payload:
-            raise Exception("Word is too big.")
+    for word in s.split():
+        # First chunk doesn't need an @reply.
+        if chunk == '':
+            available_size = max_size
+        else:
+            available_size = max_size - pad_size
+        if len(word) > available_size:
+            raise Exception("Word is too big: %s" % (word))
         elif chunk == '':
             chunk = word
-        elif 1 + len(username) + 1 + len(chunk) + 1 + len(word) > max_payload:
+        elif len(chunk + ' ' + word) > available_size:
             l.append(chunk)
             chunk = word
         else:
-            chunk = chunk + ' ' + word
+            chunk += ' ' + word
     l.append(chunk)
     return l
 
 def main():
     from creds import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET
-    obj = SeqTweet(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET)
-    api = obj.api
+    st = SeqTweet(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET)
     s = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do \
         eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim \
         ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut \
@@ -97,10 +99,10 @@ def main():
         reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla \
         pariatur. Excepteur sint occaecat cupidatat non proident, sunt in \
         culpa qui officia deserunt mollit anim id est laborum.'
-    tweet_id = list_to_twitter(api, l=text_to_list(api, s))
+    tweet_id = list_to_twitter(st.api, string_to_list(s, 10))
     print tweet_id
     print "=>"
-    print ' '.join(twitter_to_list(api, tweet_id))
+    print ' '.join(twitter_to_list(st.api, tweet_id))
 
 if __name__ == '__main__':
     main()
