@@ -54,10 +54,13 @@ def text_to_list(api, msg, max_payload=140):
     l.append(chunk)
     return l
 
+def get_api(c_key, c_secret, a_key, a_secret):
+    auth = tweepy.OAuthHandler(c_key, c_secret)
+    auth.set_access_token(a_key, a_secret)
+    return tweepy.API(auth)
+
 def main():
-    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-    auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
-    api = tweepy.API(auth)
+    api = get_api(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET)
     s = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do \
         eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim \
         ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut \
