@@ -2,7 +2,28 @@
 
 import tweepy
 
-from creds import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET
+class SeqTweet(object):
+    def __init__(self, c_key, c_secret, a_key, a_secret):
+        super(SeqTweet, self).__init__()
+        self.c_key = c_key
+        self.c_secret = c_secret
+        self.a_key = a_key
+        self.a_secret = a_secret
+        auth = tweepy.OAuthHandler(c_key, c_secret)
+        auth.set_access_token(a_key, a_secret)
+        self.api = tweepy.API(auth)
+    
+    def create(self):
+        pass
+    
+    def read(self):
+        pass
+    
+    def update(self):
+        pass
+    
+    def delete(self):
+        pass
 
 def tweets_to_list(api, tweet_pointer):
     l = []
@@ -60,7 +81,9 @@ def get_api(c_key, c_secret, a_key, a_secret):
     return tweepy.API(auth)
 
 def main():
-    api = get_api(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET)
+    from creds import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET
+    obj = SeqTweet(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET)
+    api = obj.api
     s = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do \
         eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim \
         ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut \
