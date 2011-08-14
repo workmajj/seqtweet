@@ -25,37 +25,48 @@ class SeqTweet(object):
     def delete(self):
         pass
 
-def tweets_to_list(api, tweet_pointer):
+def twitter_to_list(api, tweet_id):
     l = []
     done = False
     while not done:
-        tweet = api.get_status(id=tweet_pointer)
+        try:
+            tweet = api.get_status(id=tweet_id)
+        except:
+            raise Exception("Couldn't read Tweet: %s" % (tweet_id))
         if tweet.in_reply_to_status_id_str:
-            elem = tweet.text[len(api.me().screen_name) + 2:]
-            tweet_pointer = tweet.in_reply_to_status_id_str
+            # Remove the @reply from follow-up messages.
+            data = tweet.text[len(api.me().screen_name) + 2:]
+            tweet_id = tweet.in_reply_to_status_id_str
         else:
-            elem = tweet.text
+            data = tweet.text
             done = True
-        l.append(elem)
+        l.append(data)
     return l
 
-def list_to_tweets(api, l, max_payload=140):
+def list_to_twitter(api, l, max_size=140):
+    # Load backwards to use @replies as pointers.
     l.reverse()
-    last_tweet = None
+    tweet_id = None
     for item in l:
-        if last_tweet:
-            payload = "@%s %s" % (api.me().screen_name, item)
-            if len(payload) > max_payload:
-                raise Exception("Tweet is too big.")
-            tweet = api.update_status(status=payload,
-                in_reply_to_status_id=last_tweet)
+        if tweet_id:
+            data = "@%s %s" % (api.me().screen_name, item)
+            if len(data) > max_size:
+                raise Exception("Tweet is too big: %s" % (data))
+            try:
+                tweet = api.update_status(status=data,
+                    in_reply_to_status_id=tweet_id)
+            except:
+                raise Exception("Couldn't create Tweet: %s" (data))
         else:
-            payload = "%s" % (item)
-            if len(payload) > max_payload:
-                raise Exception("Tweet is too big.")
-            tweet = api.update_status(status=payload)
-        last_tweet = tweet.id_str
-    return last_tweet
+            data = "%s" % (item)
+            if len(data) > max_size:
+                raise Exception("Tweet is too big: %s" % (data))
+            try:
+                tweet = api.update_status(status=data)
+            except:
+                raise Exception("Couldn't create Tweet: %s" (data))
+        tweet_id = tweet.id_str
+    return tweet_id
 
 def text_to_list(api, msg, max_payload=140):
     l = []
@@ -86,10 +97,10 @@ def main():
         reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla \
         pariatur. Excepteur sint occaecat cupidatat non proident, sunt in \
         culpa qui officia deserunt mollit anim id est laborum.'
-    tweet_id = list_to_tweets(api, l=text_to_list(api, s))
+    tweet_id = list_to_twitter(api, l=text_to_list(api, s))
     print tweet_id
     print "=>"
-    print ' '.join(tweets_to_list(api, tweet_id))
+    print ' '.join(twitter_to_list(api, tweet_id))
 
 if __name__ == '__main__':
     main()
