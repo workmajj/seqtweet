@@ -27,13 +27,13 @@ class SeqTweet(object):
                 new_chunk = word + sep
             else:
                 new_chunk = word
-            if len(chunk + new_chunk) < available_size:
+            if len(chunk + new_chunk) <= available_size:
                 chunk += new_chunk
             else:
                 l.append(chunk)
                 chunk = new_chunk
                 available_size = max_size - front_pad_size # Handle @reply.
-        l.append(chunk) # Flush the last chunk.
+        l.append(chunk) # In either case, flush the last chunk.
         return l
     
     def create(self, data, sep=''):
