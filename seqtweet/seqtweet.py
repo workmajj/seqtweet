@@ -36,6 +36,49 @@ class SeqTweet(object):
         l.append(chunk) # In either case, flush the last chunk.
         return l
     
+    @staticmethod
+    def _list_to_twitter(api, l, max_size=140):
+        l.reverse() # Load backwards to use @replies as pointers.
+        tweet_id = None
+        for item in l:
+            if tweet_id:
+                payload = "@%s %s" % (api.me().screen_name, item)
+                if len(payload) > max_size:
+                    raise Exception("Tweet is too big: %s" % (payload))
+                try:
+                    tweet = api.update_status(status=payload,
+                        in_reply_to_status_id=tweet_id)
+                except:
+                    raise Exception("Couldn't create Tweet: %s" (payload))
+            else:
+                payload = "%s" % (item) # No @reply for first item.
+                if len(payload) > max_size:
+                    raise Exception("Tweet is too big: %s" % (payload))
+                try:
+                    tweet = api.update_status(status=payload)
+                except:
+                    raise Exception("Couldn't create Tweet: %s" (payload))
+            tweet_id = tweet.id_str
+        return tweet_id # Last Tweet is first item in @reply chain.
+    
+    def _twitter_to_list(api, tweet_id):
+        l = []
+        done = False
+        while not done:
+            try:
+                tweet = api.get_status(id=tweet_id)
+            except:
+                raise Exception("Couldn't read Tweet: %s" % (tweet_id))
+            if tweet.in_reply_to_status_id_str:
+                # Remove @reply from follow-up messages.
+                payload = tweet.text[len(api.me().screen_name) + 2:]
+                tweet_id = tweet.in_reply_to_status_id_str
+            else:
+                payload = tweet.text
+                done = True
+            l.append(payload)
+        return l
+    
     def create(self, data, sep=''):
         pass
     
