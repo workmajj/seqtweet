@@ -5,24 +5,47 @@ import tweepy
 class SeqTweet(object):
     def __init__(self, c_key, c_secret, a_key, a_secret):
         super(SeqTweet, self).__init__()
-        self.c_key = c_key
-        self.c_secret = c_secret
-        self.a_key = a_key
-        self.a_secret = a_secret
         auth = tweepy.OAuthHandler(c_key, c_secret)
         auth.set_access_token(a_key, a_secret)
         self.api = tweepy.API(auth)
     
-    def create(self):
+    @staticmethod
+    def _chunk_data(front_pad_size, data, sep='', max_size=140):
+        l = []
+        chunk = ''
+        available_size = max_size # First Tweet has no @reply.
+        if sep == '':
+            split_data = list(data)
+        else:
+            split_data = data.split(sep)
+        for i in xrange(len(split_data)):
+            word = split_data[i]
+            if len(word) > available_size:
+                raise Exception("Word is too big: %s" % (word))
+            # Keep all separators so concatenating Tweets works.
+            if i < len(split_data) - 1:
+                new_chunk = word + sep
+            else:
+                new_chunk = word
+            if len(chunk + new_chunk) < available_size:
+                chunk += new_chunk
+            else:
+                l.append(chunk)
+                chunk = new_chunk
+                available_size = max_size - front_pad_size # Handle @reply.
+        l.append(chunk) # Flush the last chunk.
+        return l
+    
+    def create(self, data, sep=''):
         pass
     
-    def read(self):
+    def read(self, tweet_id):
         pass
     
-    def update(self):
+    def update(self, tweet_id, data, sep=''):
         pass
     
-    def delete(self):
+    def delete(self, tweet_id):
         pass
 
 def twitter_to_list(api, tweet_id):
