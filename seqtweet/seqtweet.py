@@ -10,30 +10,28 @@ class SeqTweet(object):
         self.api = tweepy.API(auth)
     
     @staticmethod
-    def _chunk_data(front_pad_size, data, sep='', max_size=140):
+    def _chunk_data(front_pad_size, data, sep=None, max_size=140):
+        # For considering @replies on all but the last chunk.
+        if front_pad_size >= max_size:
+            raise Exception("Front pad size leaves no room for data.")
+        chunk_size = max_size - front_pad_size
         l = []
-        chunk = ''
-        available_size = max_size # First Tweet has no @reply.
-        if sep == '':
-            split_data = list(data)
-        else:
-            split_data = data.split(sep)
-        for i in xrange(len(split_data)):
-            word = split_data[i]
-            if len(word) > available_size:
-                raise Exception("Word is too big: %s" % (word))
-            # Keep all separators so concatenating Tweets works.
-            if i < len(split_data) - 1:
-                new_chunk = word + sep
+        done = False
+        while not done:
+            # Last chunk needs no @reply.
+            if len(data) <= max_size:
+                chunk = data
+                done = True
             else:
-                new_chunk = word
-            if len(chunk + new_chunk) <= available_size:
-                chunk += new_chunk
-            else:
-                l.append(chunk)
-                chunk = new_chunk
-                available_size = max_size - front_pad_size # Handle @reply.
-        l.append(chunk) # In either case, flush the last chunk.
+                # For delimited data, separator is first in subsequent chunks.
+                # Ensures concatenating chunks always gives the original data.
+                if sep:
+                    while data[chunk_size] is not sep:
+                        chunk_size -= 1
+                        if chunk_size < 1:
+                            raise Exception("Chunk is bigger than max size.")
+                (chunk, data) = (data[0:chunk_size], data[chunk_size:])
+            l.append(chunk)
         return l
     
     @staticmethod
@@ -70,7 +68,7 @@ class SeqTweet(object):
             except:
                 raise Exception("Couldn't read Tweet: %s" % (tweet_id))
             if tweet.in_reply_to_status_id_str:
-                # Remove @reply from follow-up messages.
+                # Remove @replies from follow-up messages.
                 payload = tweet.text[len(api.me().screen_name) + 2:]
                 tweet_id = tweet.in_reply_to_status_id_str
             else:
@@ -79,13 +77,13 @@ class SeqTweet(object):
             l.append(payload)
         return l
     
-    def create(self, data, sep=''):
+    def create(self, data, sep=None):
         pass
     
     def read(self, tweet_id):
         pass
     
-    def update(self, tweet_id, data, sep=''):
+    def update(self, tweet_id, data, sep=None):
         pass
     
     def delete(self, tweet_id):
