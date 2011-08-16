@@ -23,8 +23,8 @@ class SeqTweet(object):
                 chunk = data
                 done = True
             else:
-                # For delimited data, separator is first in subsequent chunks.
-                # Ensures concatenating chunks always gives the original data.
+                # Since separator is often whitespace, and Twitter deletes from
+                # start/end of Tweets, remove separator and add back when read.
                 if sep:
                     while data[chunk_size] is not sep:
                         chunk_size -= 1
@@ -69,7 +69,7 @@ class SeqTweet(object):
             except:
                 raise Exception("Couldn't read Tweet: %s" % (tweet_id))
             if tweet.in_reply_to_status_id_str:
-                # Remove @replies from follow-up messages.
+                # Remove @replies from follow-up Tweets.
                 payload = tweet.text[len(api.me().screen_name) + 2:]
                 tweet_id = tweet.in_reply_to_status_id_str
             else:
@@ -78,13 +78,21 @@ class SeqTweet(object):
             l.append(payload)
         return l
     
-    def create(self, data, sep=None):
-        pass
+    def create(self, data, sep=None, max_size=140):
+        at_reply_size = len(self.api.me().screen_name) + 2
+        l = self._chunk_data(at_reply_size, data, sep, max_size)
+        tweet_id = self._list_to_twitter(self.api, l, max_size)
+        return tweet_id
     
-    def read(self, tweet_id):
-        pass
+    def read(self, tweet_id, sep=None):
+        l = self._twitter_to_list(self.api, tweet_id)
+        # Debugging output below. (Twitter strips leading/trailing spaces?)
+        print l
+        data = ''.join(l)
+        # data = ''.join(self._twitter_to_list(self.api, tweet_id))
+        return data
     
-    def update(self, tweet_id, data, sep=None):
+    def update(self, tweet_id, data, sep=None, max_size=140):
         pass
     
     def delete(self, tweet_id):
@@ -93,6 +101,15 @@ class SeqTweet(object):
 def main():
     from creds import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET
     obj = SeqTweet(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET)
+    s = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+    print s
+    tweet_id = obj.create(s, ' ')
+    print "=>"
+    print tweet_id
+    print "=>"
+    data = obj.read(tweet_id, ' ')
+    print data
+    print "Same? %s" % (data is s)
 
 if __name__ == '__main__':
     main()
