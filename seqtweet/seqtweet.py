@@ -47,7 +47,7 @@ class SeqTweet(object):
                     tweet = api.update_status(status=payload,
                         in_reply_to_status_id=tweet_id)
                 except:
-                    raise Exception("Couldn't create Tweet: %s" (payload))
+                    raise Exception("Couldn't create Tweet: %s" % (payload))
             else:
                 payload = "%s" % (item) # No @reply for first item.
                 if len(payload) > max_size:
@@ -55,7 +55,7 @@ class SeqTweet(object):
                 try:
                     tweet = api.update_status(status=payload)
                 except:
-                    raise Exception("Couldn't create Tweet: %s" (payload))
+                    raise Exception("Couldn't create Tweet: %s" % (payload))
             tweet_id = tweet.id_str
         return tweet_id # Last Tweet is first item in @reply chain.
     
