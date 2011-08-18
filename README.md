@@ -34,7 +34,7 @@ Testing & Usage
 
 7. To use the SeqTweet library with your own scripts, simply import the object:
 
-        from seqtwee.seqtweet import SeqTweet
+        from seqtweet.seqtweet import SeqTweet
 
 8. And then instantiate a SeqTweet object using the appropriate OAuth values, which gives you access to the CRUD functions.
 
