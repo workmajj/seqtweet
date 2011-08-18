@@ -6,4 +6,3 @@
 dist/*
 include/*
 lib/*
-seqtweet/creds.py
