@@ -110,28 +110,41 @@ class SeqTweet(object):
     def update(self, tweet_id, data, sep=' ', max_size=140):
         try:
             self._delete_twitter(self.api, tweet_id)
-            tweet_id = self.create(data, sep, max_size)
+            new_tweet_id = self.create(data, sep, max_size)
         except:
             raise Exception("Couldn't update Tweet: %s" % (tweet_id))
-        return tweet_id
+        return new_tweet_id
     
     def delete(self, tweet_id):
         success = self._delete_twitter(self.api, tweet_id)
         return success
 
 def main():
+    # Test out the CRUD functions.
     from creds import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET
     obj = SeqTweet(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET)
-    s = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    print s
-    tweet_id = obj.create(s)
-    print "Created ID? %s" % (tweet_id)
+    s1 = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do ' \
+        'eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut ' \
+        'enim ad minim veniam, quis nostrud exercitation ullamco laboris ' \
+        'nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in ' \
+        'reprehenderit in voluptate velit esse cillum dolore eu fugiat ' \
+        'nulla pariatur. Excepteur sint occaecat cupidatat non proident, ' \
+        'sunt in culpa qui officia deserunt mollit anim id est laborum.'
+    print "s1: %s" % (s1)
+    tweet_id = obj.create(s1)
+    print "Tweets for s1 start at: %s" % (tweet_id)
     data = obj.read(tweet_id)
-    print data
-    print "Same? %s" % (data == s)
-    t = 'foo, bar, baz, qux, quux, corge, grault, garply, waldo, fred, plugh, xyzzy, thud, foo, bar, baz, qux, quux, corge, grault, garply, waldo, fred, plugh, xyzzy, thud'
-    print t
-    print "Updated ID? %s" % (obj.update(tweet_id, t))
+    print "s1 read from Twitter: %s" % (data)
+    print "Are they equal? %s" % (data == s1)
+    s2 = 'foo, bar, baz, qux, quux, corge, grault, garply, waldo, fred, ' \
+        'plugh, xyzzy, thud, foo, bar, baz, qux, quux, corge, grault, ' \
+        'garply, waldo, fred, plugh, xyzzy, thud'
+    print "s2: %s" % (s2)
+    tweet_id = obj.update(tweet_id, s2)
+    print "Updated with s2 starting at: %s" % (tweet_id)
+    data = obj.read(tweet_id)
+    print "Are they equal? %s" % (data == s2)
+    print "Deleted s2 successfully? %s" % (obj.delete(tweet_id))
 
 if __name__ == '__main__':
     main()
