@@ -76,6 +76,26 @@ class SeqTweet(object):
             l.append(payload)
         return l
     
+    @staticmethod
+    def _delete_twitter(api, tweet_id):
+        next_tweet = None
+        done = False
+        while not done:
+            try:
+                tweet = api.get_status(id=tweet_id)
+            except:
+                raise Exception("Couldn't read Tweet: %s" % (tweet_id))
+            if tweet.in_reply_to_status_id_str:
+                next_tweet = tweet.in_reply_to_status_id_str
+            else:
+                done = True
+            try:
+                api.destroy_status(id=tweet_id)
+            except:
+                raise Exception("Couldn't delete Tweet: %s" % (tweet_id))
+            tweet_id = next_tweet
+        return True
+    
     def create(self, data, sep=' ', max_size=140):
         at_reply_size = len(self.api.me().screen_name) + 2
         l = self._chunk_data(at_reply_size, data, sep, max_size)
@@ -91,7 +111,8 @@ class SeqTweet(object):
         pass
     
     def delete(self, tweet_id):
-        pass
+        success = self._delete_twitter(self.api, tweet_id)
+        return success
 
 def main():
     from creds import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET
@@ -103,6 +124,7 @@ def main():
     data = obj.read(tweet_id)
     print data
     print "Same? %s" % (data == s)
+    print "Deleted? %s" % (obj.delete(tweet_id))
 
 if __name__ == '__main__':
     main()
