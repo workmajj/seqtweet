@@ -108,7 +108,12 @@ class SeqTweet(object):
         return data
     
     def update(self, tweet_id, data, sep=' ', max_size=140):
-        pass
+        try:
+            self._delete_twitter(self.api, tweet_id)
+            tweet_id = self.create(data, sep, max_size)
+        except:
+            raise Exception("Couldn't update Tweet: %s" % (tweet_id))
+        return tweet_id
     
     def delete(self, tweet_id):
         success = self._delete_twitter(self.api, tweet_id)
@@ -120,11 +125,13 @@ def main():
     s = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
     print s
     tweet_id = obj.create(s)
-    print "=> %s =>" % (tweet_id)
+    print "Created ID? %s" % (tweet_id)
     data = obj.read(tweet_id)
     print data
     print "Same? %s" % (data == s)
-    print "Deleted? %s" % (obj.delete(tweet_id))
+    t = 'foo, bar, baz, qux, quux, corge, grault, garply, waldo, fred, plugh, xyzzy, thud, foo, bar, baz, qux, quux, corge, grault, garply, waldo, fred, plugh, xyzzy, thud'
+    print t
+    print "Updated ID? %s" % (obj.update(tweet_id, t))
 
 if __name__ == '__main__':
     main()
