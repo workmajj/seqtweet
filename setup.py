@@ -13,9 +13,7 @@ setup(
     license = "BSD 3-Clause <http://www.opensource.org/licenses/BSD-3-Clause>",
     classifiers=[
         'Development Status :: 3 - Alpha',
-        'Operating System :: MacOS :: MacOS X',
         'Topic :: Internet',
-        'Topic :: Utilities'
     ],
     install_requires=['Tweepy>=1.7.1'],
     packages=['seqtweet']
