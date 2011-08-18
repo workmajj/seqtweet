@@ -84,10 +84,7 @@ class SeqTweet(object):
     
     def read(self, tweet_id, sep=' '):
         l = self._twitter_to_list(self.api, tweet_id)
-        # Debugging output below. (Twitter strips leading/trailing spaces?)
-        print l
-        data = ' '.join(l)
-        # data = ''.join(self._twitter_to_list(self.api, tweet_id))
+        data = sep.join(l)
         return data
     
     def update(self, tweet_id, data, sep=' ', max_size=140):
